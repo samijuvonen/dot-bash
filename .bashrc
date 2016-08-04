@@ -1,5 +1,7 @@
-# .bashrc
-#set -x
+######################################################################
+# The .bashrc!  SJJ 1985-2016
+######################################################################
+#set -x # uncomment to debug
 
 ## ===================================================================
 ## Basic bash configuration
@@ -7,9 +9,13 @@
 # Source global bashrc if we're interactive.
 case "$-" in
     *i*)
-        [ -r /etc/bashrc ] && . /etc/bashrc ;;
+        [ -r /etc/bashrc ] && . /etc/bashrc
+        # make emacsish C-s/C-w available (it's the 21st Century!)
+        stty stop undef     
+        stty werase undef
+        ;;
     *)
-    ;;
+        ;;
 esac
 # restrictive umask
 umask 0077
@@ -47,8 +53,9 @@ shopt -s lithist
 HISTTIMEFORMAT="%F/%T  "
 HISTCONTROL=ignoreboth
 HISTIGNORE="?:??"
-HISTSIZE=2000
-HISTFILESIZE=2000
+HISTFILE="${HOME}/.bash_history.${HOSTNAME}"
+HISTSIZE=-1
+HISTFILESIZE=-1
 history -r
 
 ## ===================================================================
@@ -79,7 +86,7 @@ export MANOPT="--no-hyphenation --no-justification"
 shopt -s autocd
 shopt -s cdspell
 shopt -s cdable_vars
-# export CDPATH=
+CDPATH=":$HOME"
 function mycd() {
     case "$@" in
         "")
@@ -92,11 +99,13 @@ function mycd() {
             _cd "$(dirs +1)" && popd -n +1 > /dev/null
             ;;
         *)
-            pushd "$1"
+            pushd "$1" > /dev/null
     esac
 }
 alias cd=mycd
 alias _cd="builtin cd"
+alias p=popd
+alias dirs="dirs -v"
 
 # make a dir and change to it
 function mkcd() { mkdir -p "$@" && eval cd "\"\$$#\""; }
@@ -134,7 +143,7 @@ show_error() {
     local rc=$?
     local Smiley="${Goodsigns:$(( ${RANDOM} % ${#Goodsigns})):1}"
     case $TERM in
-        *color*)
+        *color*|linux)
             if [ $rc -ne 0 ]; then
                 echo "(${Orange}${rc}${Reset})"
             else
@@ -152,13 +161,31 @@ show_error() {
 }
 
 xtitle() {
+    local myxtitle
     case $TERM in
-        *xterm*)
-            XTITLE='\[\033]0;\u@\h:\w\007\]' ;;
+        *xterm*|*screen*)
+            myxtitle='\[\033]0;\u@\h:\w\007\]' ;;
         *)
-            XTITLE='' ;;
+            myxtitle='' ;;
     esac
-    echo "$XTITLE"
+    echo "$myxtitle"
+}
+
+show_venv() {
+    local myvenv
+    if [ $VIRTUAL_ENV ]; then
+        case $TERM in
+            *color*|linux)
+                myvenv="(${Cyan}${VIRTUAL_ENV##*/}${Reset})"
+                ;;
+            *)
+                myvenv="(${VIRTUAL_ENV##*/})"
+                ;;
+        esac
+    else
+        myvenv=''
+    fi
+    echo -n "$myvenv"
 }
 
 ## -------------------------------------------------------------------
@@ -176,14 +203,17 @@ for p in "/usr/share/git-core/contrib/completion/git-prompt.sh" \
         export GIT_PS1_SHOWUNTRACKEDFILES=1
         export GIT_PS1_SHOWUPSTREAM=auto
         case $TERM in
-            *color*)
+            *color*|linux)
                 export GIT_PS1_SHOWCOLORHINTS=1 
-                PROMPT_COMMAND='__git_ps1 "$(xtitle)$(show_error)\! \u@${Green}\h${Reset}:\w"\
-                          "${Yellow}\\\$${Reset} "'
+                PROMPT_COMMAND='__git_ps1 \
+                 "$(history -a)$(xtitle)$(show_error)\! \u@${Green}\h${Reset}:\w" \
+                 "$(show_venv)${Yellow}\\\$${Reset} "'
                 ;;
             *)
                 export GIT_PS1_SHOWCOLORHINTS=0
-                PROMPT_COMMAND='__git_ps1 "$(xtitle)$(show_error)\! \u@\h:\w" "\\\$ "'
+                PROMPT_COMMAND='__git_ps1 \
+                 "$(history -a)$(xtitle)$(show_error)\! \u@\h:\w" \
+                 "$(show_venv)\\\$ "'
                 ;;
         esac
         break
@@ -235,10 +265,12 @@ showcolors16() {
 
 # aliases
 alias bc="bc -lq"
-alias p88="ping 8.8.8.8"
-alias p44="ping 8.8.4.4"
-#alias myip='dig @208.67.222.220 myip.opendns.com +short'
+alias pi88="ping 8.8.8.8"
+alias pi44="ping 8.8.4.4"
 alias pubip='dig TXT +short o-o.myaddr.l.google.com @ns1.google.com | tr -d \"'
+alias pubip2='dig @208.67.222.220 myip.opendns.com +short'
+alias ff="firefox --new-tab"
+alias gno="gnome-open"
 
 ## ===================================================================
 ## Python
@@ -247,8 +279,8 @@ alias pubip='dig TXT +short o-o.myaddr.l.google.com @ns1.google.com | tr -d \"'
 # these may need setting
 # VIRTUALENVWRAPPER_PYTHON=
 # VIRTUALENVWRAPPER_VIRTUALENV=
-if [ $(which virtualenvwrapper.sh > /dev/null 2>&1) ]; then
-    export WORKON_HOME=$HOME/.virtualenvs
+if [ $(which virtualenvwrapper.sh) > /dev/null 2>&1 ]; then
+    export WORKON_HOME=$HOME/Code/python/envs
     export PROJECT_HOME=$HOME/Projects
     source virtualenvwrapper.sh
 fi
@@ -265,21 +297,22 @@ done
 ## ===================================================================
 ## Go-lang
 ## ===================================================================
-export GOPATH="$HOME/Code/go/"
+export GOPATH="$HOME/Code/go"
 export PATH=$PATH:$GOPATH/bin
 
 ## ===================================================================
 ## The One True Editor (or that other one)
 ## ===================================================================
-if [ $(which emacs > /dev/null 2>&1) ]; then
+if [ $(which emacs) >/dev/null 2>&1 ]; then
     export EDITOR="emacsclient -n -c -a emacs"
-elif [ $(which vim > /dev/null 2>&1) ]; then
+elif [ $(which vim) >/dev/null 2>&1 ]; then
     export EDITOR=vim
     alias vi=vim
 else
     export EDITOR=vi
 fi
 alias e="$EDITOR "
+# echo "FYI, editor is $EDITOR. Enjoy."
 
 ## ===================================================================
 ## GPG
@@ -287,18 +320,40 @@ alias e="$EDITOR "
 if [ -x /usr/bin/gpg2 ]; then
     alias gpg=/usr/bin/gpg2
 fi
-
-# if we're in a desktop session on Linux, configure gpg-agent
-if [ $DESKTOP_SESSION ]; then 
-    # let gpg-agent know where we are
-    GPG_TTY=$(tty)
-    export GPG_TTY
-    # ping gpg-agent for ssh support
-    /usr/bin/gpg-connect-agent /bye && \
-        unset SSH_AGENT_PID SSH_ASKPASS SSH_AUTH_SOCK GPG_AGENT_PID
-    if [ -S "${HOME}/.gnupg/S.gpg-agent.ssh" ]; then
-        export SSH_AUTH_SOCK="${HOME}/.gnupg/S.gpg-agent.ssh"
+# put this in a function so it can be called when gpg-agent flakes out
+gpgsetup() {
+    # start gpg-agent if we're in a desktop session
+    if [ ! $SSH_CONNECTION ]; then 
+        # let gpg-agent know where we are
+        GPG_TTY=$(tty)
+        export GPG_TTY
+        # make sure gpg-agent is started for ssh support
+        # and will prompt on this display/tty
+        gpg-connect-agent updatestartuptty /bye >/dev/null && \
+            unset SSH_AGENT_PID SSH_ASKPASS SSH_AUTH_SOCK GPG_AGENT_PID
+        if [ "${gnupg_SSH_AUTH_SOCK_by:-0}" -ne $$ ]; then
+            export SSH_AUTH_SOCK="/run/user/$(id -u)/gnupg/S.gpg-agent.ssh"
+        fi
     fi
+}
+if [ $(which gpg-connect-agent) >/dev/null 2>&1 ]; then
+    gpgsetup
 fi
 
+## ===================================================================
+## TeX
+## ===================================================================
+if [ -d ~/.texmf ] ; then
+    export TEXMFHOME=~/.texmf
+fi
 
+## ===================================================================
+## Systemd environment
+## ===================================================================
+# I'm running Emacs daemon with systemd user service. Need to update
+# systemd environment so Emacs has our current $PATH etc.
+if [ -x /usr/bin/systemctl ]; then
+    systemctl --user import-environment PATH GOPATH \
+              WORKON_HOME PROJECT_HOME \
+              TEXMFHOME
+fi
