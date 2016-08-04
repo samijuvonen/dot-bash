@@ -28,6 +28,7 @@ export PATH="$HOME/bin:$PATH:$HOME/.local/bin"
 # -------------------------------------------------------------------
 # Various bash options
 # -------------------------------------------------------------------
+set -k
 shopt -s checkhash
 shopt -s checkjobs
 shopt -s checkwinsize
@@ -56,7 +57,7 @@ HISTIGNORE="?:??"
 HISTFILE="${HOME}/.bash_history.${HOSTNAME}"
 HISTSIZE=-1
 HISTFILESIZE=-1
-history -r
+#history -r
 
 ## ===================================================================
 ## $PAGER / less(8) options
