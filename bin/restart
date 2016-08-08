@@ -1,0 +1,13 @@
+#!/bin/sh
+#
+# restart various user level things
+
+case $1 in
+    emacs)
+        systemctl --user restart emacs ;;
+    pulse*)
+        pulseaudio --kill && start-pulseaudio-x11 ;;
+    *)
+        echo "Don't know how to restart $1."
+esac
+        

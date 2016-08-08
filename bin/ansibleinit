@@ -1,0 +1,37 @@
+#!/bin/bash
+#  -*- mode: sh; -*-
+# Quick and dirty ansible directory structure initialization.
+# Sam Juvonen 2016. Public domain.
+# ---------------------------------------------------------------
+usage() {
+    printf "%s\n\n" "usage: $0 top|role foo"
+    exit 1
+}
+
+case $1 in
+    top)
+        mkdir -p group_vars 
+        mkdir -p host_vars 
+        mkdir -p library 
+        mkdir -p filter_plugins
+        if [ ! -e site.yml ]; then
+            printf "# sitewide master playbook\n---\n" > site.yml
+        fi
+        
+        ;;
+    role)
+        if [ $2 ]; then
+            mkdir -p roles/$2/{templates,files}
+            for f in roles/$2/{tasks,handlers,vars,defaults,meta}; do
+                mkdir -p $f
+                if [ ! -e $f/main.yml ]; then
+                    printf "# $f/main.yml\n---\n" > $f/main.yml
+                fi
+            done
+        else
+            usage
+        fi
+        ;;
+    *)
+        usage
+esac

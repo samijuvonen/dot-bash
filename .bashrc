@@ -28,7 +28,6 @@ export PATH="$HOME/bin:$PATH:$HOME/.local/bin"
 # -------------------------------------------------------------------
 # Various bash options
 # -------------------------------------------------------------------
-set -k
 shopt -s checkhash
 shopt -s checkjobs
 shopt -s checkwinsize
@@ -346,6 +345,8 @@ fi
 ## ===================================================================
 if [ -d ~/.texmf ] ; then
     export TEXMFHOME=~/.texmf
+elif [ -d ~/texmf ]; then
+    export TEXMFHOME=~/texmf
 fi
 
 ## ===================================================================
