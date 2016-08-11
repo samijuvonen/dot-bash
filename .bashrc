@@ -54,8 +54,8 @@ HISTTIMEFORMAT="%F/%T  "
 HISTCONTROL=ignoreboth
 HISTIGNORE="?:??"
 HISTFILE="${HOME}/.bash_history.${HOSTNAME}"
-HISTSIZE=-1
-HISTFILESIZE=-1
+HISTSIZE=20000
+HISTFILESIZE=20000
 #history -r
 
 ## ===================================================================
@@ -220,28 +220,6 @@ for p in "/usr/share/git-core/contrib/completion/git-prompt.sh" \
     fi
 done
 
-
-
-# if [ -n $INSIDE_EMACS -o $TERM = "dumb" ]; then
-#     PS1="${PS1PRE}${PS1POST}"
-# else 
-#     case $TERM in
-#         xterm*color)
-        
-#     esac
-# fi
-
-# my_prompt_command(){
-#     local Last_exit=$?
-#     history -a
-#     local Smiley="${Goodsigns:$(( ${RANDOM} % ${#Goodsigns})):1}"
-#     if [ $Last_exit -eq 0 ]; then
-#         PS1="${Green}${Smiley}${Reset}"
-#     else
-#         PS1="[${Orange}${Last_exit}${Reset}]"
-#     fi
-#     PS1+="$(\!) \u@${Green}\h:${White}\w\${Reset} \$"
-# }
 
 
 ## ===================================================================
