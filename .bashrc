@@ -206,7 +206,7 @@ for p in "/usr/share/git-core/contrib/completion/git-prompt.sh" \
             *color*|linux)
                 export GIT_PS1_SHOWCOLORHINTS=1 
                 PROMPT_COMMAND='__git_ps1 \
-                 "$(history -a)$(xtitle)$(show_error)\! \u@${Green}\h${Reset}:\w" \
+                 "$(show_error)\! \u@${Green}\h${Reset}:\w" \
                  "$(show_venv)${Yellow}\\\$${Reset} "'
                 ;;
             *)
