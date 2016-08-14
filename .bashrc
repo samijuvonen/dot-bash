@@ -301,7 +301,7 @@ fi
 # put this in a function so it can be called when gpg-agent flakes out
 gpgsetup() {
     # start gpg-agent if we're in a desktop session
-    if [ ! $SSH_CONNECTION ]; then 
+    if [ ! "$SSH_CONNECTION" ]; then 
         # let gpg-agent know where we are
         GPG_TTY=$(tty)
         export GPG_TTY
