@@ -290,6 +290,8 @@ else
     export EDITOR=vi
 fi
 alias e="$EDITOR "
+alias E="sudoedit"
+
 # echo "FYI, editor is $EDITOR. Enjoy."
 
 ## ===================================================================
@@ -335,5 +337,6 @@ fi
 if [ -x /usr/bin/systemctl ]; then
     systemctl --user import-environment PATH GOPATH \
               WORKON_HOME PROJECT_HOME \
-              TEXMFHOME
+              TEXMFHOME \
+              SSH_AUTH_SOCK
 fi
