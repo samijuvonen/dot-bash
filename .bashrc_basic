@@ -1,0 +1,163 @@
+# .bashrc
+
+# On Fedora/CentOS/RHEL at least, make this 256 color terminal for
+# remote connections. See /etc/profile.d/256term.sh.
+SEND_256_COLORS_TO_REMOTE=1
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+	. /etc/bashrc
+fi
+
+# restrictive umask
+umask 0077
+
+export PATH="$HOME/bin:$PATH:$HOME/.local/bin"
+
+# -------------------------------------------------------------------
+# Various bash options
+# -------------------------------------------------------------------
+shopt -s checkhash
+shopt -s checkwinsize
+shopt -s extglob
+shopt -s hostcomplete
+shopt -s progcomp
+shopt -s sourcepath
+shopt -s xpg_echo
+
+# TODO: Figure precise versions for these
+if [ ${BASH_VERSINFO[0]} -ge 4 ]; then
+	shopt -s checkjobs    # not in 3.2
+	shopt -s direxpand    # not in 3.2
+	shopt -s dirspell     # not in 3.2
+	shopt -s globstar     # not in 3.2
+	shopt -s autocd       # not in 3.2
+fi
+
+IGNOREEOF=2
+MAILCHECK=0
+
+## ===================================================================
+## bash command history setup
+## ===================================================================
+shopt -s cmdhist
+shopt -s histappend
+shopt -s histreedit
+shopt -s histverify
+shopt -s lithist
+HISTTIMEFORMAT="%F/%T  "
+HISTCONTROL=ignoreboth
+HISTIGNORE="?:??"
+HISTFILE="${HOME}/.bash_history.${HOSTNAME}"
+HISTSIZE=20000
+HISTFILESIZE=20000
+#history -r
+
+## ===================================================================
+## $PAGER / less(8) options
+## ===================================================================
+export PAGER="less"
+export LESS="FiJMnQRsW#.5"
+export SYSTEMD_LESS="FRXMK"
+# Uncomment the following line if you don't like systemctl's auto-paging feature:
+# export SYSTEMD_PAGER=
+# Widespread less hack for color in man pages (deplored by less author).
+#export LESS_TERMCAP_mb=$'\E[01;31m'
+#export LESS_TERMCAP_md=$'\E[01;31m'
+#export LESS_TERMCAP_me=$'\E[0m'
+#export LESS_TERMCAP_se=$'\E[0m'
+#export LESS_TERMCAP_so=$'\E[01;44;33m'
+#export LESS_TERMCAP_ue=$'\E[0m'
+#export LESS_TERMCAP_us=$'\E[01;32m'
+
+## ===================================================================
+## man(8) options
+## ===================================================================
+export MANOPT="--no-hyphenation --no-justification"
+
+## ===================================================================
+## cd options and hacks
+## ===================================================================
+shopt -s cdspell
+shopt -s cdable_vars
+
+CDPATH=":$HOME"
+function mycd() {
+    case "$@" in
+        "")
+            pushd "${HOME}"
+            ;;
+        "-")
+            popd > /dev/null
+            ;;
+        "--")
+            _cd "$(dirs +1)" && popd -n +1 > /dev/null
+            ;;
+        *)
+            pushd "$1" > /dev/null
+    esac
+}
+alias cd=mycd
+alias _cd="builtin cd"
+alias p=popd
+alias dirs="dirs -v"
+
+# make a dir and change to it
+function mkcd() { mkdir -p "$@" && eval cd "\"\$$#\""; }
+alias nd=mkcd
+
+## ===================================================================
+## Prompt
+## ===================================================================
+PROMPT_DIRTRIM=3
+
+xtitle() {
+    local myxtitle
+    case $TERM in
+        *xterm*|*screen*)
+            myxtitle='\[\033]0;\u@\h:\w\007\]' ;;
+        *)
+            myxtitle='' ;;
+    esac
+    echo "$myxtitle"
+}
+
+# aliases
+alias bc="bc -lq"
+alias pi88="ping 8.8.8.8"
+alias pi44="ping 8.8.4.4"
+alias pubip='dig TXT +short o-o.myaddr.l.google.com @ns1.google.com | tr -d \"'
+alias pubip2='dig @208.67.222.220 myip.opendns.com +short'
+alias ff="firefox --new-tab"
+alias gno="gnome-open"
+
+## ===================================================================
+## The One True Editor (or that other one)
+## ===================================================================
+if [ $(which emacs) >/dev/null 2>&1 ]; then
+    export EDITOR="emacsclient -n -c -a emacs"
+elif [ $(which vim) >/dev/null 2>&1 ]; then
+    export EDITOR=vim
+    alias vi=vim
+else
+    export EDITOR=vi
+fi
+alias e="$EDITOR "
+alias E="sudoedit"
+
+
+# when we're interactive:
+case "$-" in
+	*i*)
+	echo "FYI, editor is $EDITOR. Enjoy."
+	# Welcome to the 21st C!
+	stty stop undef     
+	stty werase undef
+esac
+
+#PS1='\u@\h:\w\[\033k\033\\ \]\$ '
+if [ $STY ]; then
+	PS1='\[\033k\033\\\]\u@\h:\w \$ '
+else
+	PS1='\u@\h:\w \$ '
+fi

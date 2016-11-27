@@ -1,0 +1,55 @@
+# .screenrc
+#
+
+# --------------------------------------------------------------------
+# GENERAL OPTIONS
+# --------------------------------------------------------------------
+# command char is C-z
+escape ^Zz
+
+# be quiet
+startup_message off
+vbell off
+vbell_msg "Bell in %t (%n)"
+activity "Activity in %t (%n)"
+
+# keep decent size scrollback
+defscrollback 20000
+
+# run $SHELL as login shell
+shell -$SHELL
+
+# colors are nice
+# Set term here if connecting to RHEL 5 machines and running screen there. 
+# Default in screen 4.4+ is screen.$TERM, which old screen won't accept (too long).
+term xterm-256color
+# allow scrolling (but messes with screen's history buffer)
+termcapinfo xterm* ti@:te@
+
+
+# --------------------------------------------------------------------
+# BINDINGS
+# --------------------------------------------------------------------
+# window numbering starts at 1, not 0.
+bind c screen 1
+bind ^c screen 1
+bind 0 select 10
+screen 1
+
+# resize current region
+bind = resize =
+bind + resize +2
+bind - resize -2
+
+bind j focus down
+bind k focus up
+
+bind f eval "hardstatus ignore"
+bind F eval "hardstatus alwayslastline"
+
+
+# --------------------------------------------------------------------
+# STATUS DISPLAY
+# --------------------------------------------------------------------
+shelltitle "$ |$HOSTNAME"
+hardstatus alwayslastline '%{= kg}[%{G}%H%{g}:%S][%= %{= kw}%?%-Lw%?%{r}(%{W}%n*%f%t%?(%u)%?%{r})%{w}%?%+Lw%?%?%= %{g}][%{G}%c%{g}]'

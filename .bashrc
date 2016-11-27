@@ -163,8 +163,10 @@ show_error() {
 xtitle() {
     local myxtitle
     case $TERM in
-        *xterm*|*screen*)
+        *xterm*|*rxvt*)
             myxtitle='\[\033]0;\u@\h:\w\007\]' ;;
+	screen*)
+	    myxtitle='\[\033k\033\\\]' ;;
         *)
             myxtitle='' ;;
     esac
